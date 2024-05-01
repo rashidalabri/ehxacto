@@ -14,7 +14,7 @@ pub fn find_motif_matches_no_rot(motif: &Sequence, seq: &Sequence) -> Vec<(usize
     while idx <= seq_len - motif_len {
         if seq[idx..idx + motif_len] == **motif {
             results.push((idx, idx + motif_len));
-            idx = idx + motif_len; // Move past the current match
+            idx += motif_len; // Move past the current match
         } else {
             idx += 1;
         }
@@ -107,8 +107,8 @@ pub fn purity_score_ldist(seq: &[u8], motif: &[u8], threshold: f64) -> f64 {
     let motif_len = motif.len() as u32;
 
     let edits_bound = (seq.len() as f64 * (1.0 - threshold)) as u32 + motif_len + 1;
-    let ldist = bounded_levenshtein(&seq, &pure_repeat, edits_bound).unwrap_or(edits_bound)
-        - (motif_len - 1) as u32;
+    let ldist = bounded_levenshtein(seq, &pure_repeat, edits_bound).unwrap_or(edits_bound)
+        - (motif_len - 1);
     // let ldist = levenshtein(&seq, &pure_repeat) - (motif_len - 1);
     let norm_ldist = ldist as f64 / seq.len() as f64;
     1.0 - norm_ldist
@@ -119,7 +119,7 @@ pub fn filter_intervals_by_length(
     min_length: usize,
 ) -> Vec<(usize, usize)> {
     intervals
-        .into_iter()
+        .iter()
         .filter(|t| t.1 - t.0 >= min_length)
         .cloned()
         .collect()
@@ -174,9 +174,7 @@ pub fn find_repeat_variants(
     let intervals = filter_intervals_by_length(&intervals, min_length);
 
     // Filter out intervals that have low purity
-    let intervals = filter_intervals_by_purity(&intervals, threshold, motif, seq);
-
-    intervals
+    filter_intervals_by_purity(&intervals, threshold, motif, seq)
 }
 
 fn merge_intervals_by_purity(
@@ -232,26 +230,22 @@ fn merge_intervals_by_purity(
         }
     }
 
-    let diagonal: Vec<_> = (0..n).into_iter().map(|i| dp[i][i]).collect();
-
-    retrieve_intervals(&intervals, &merge, &diagonal, 0, n - 1)
+    retrieve_intervals(&intervals, &merge, 0, n - 1)
 }
 
 fn retrieve_intervals(
     intervals: &Vec<(usize, usize)>,
     merge: &Vec<Vec<i32>>,
-    diagonal: &Vec<usize>,
     i: usize,
     j: usize,
 ) -> Vec<(usize, usize)> {
     let mut cache = HashMap::new();
-    retrieve_intervals_cached(intervals, merge, diagonal, i, j, &mut cache)
+    retrieve_intervals_cached(intervals, merge, i, j, &mut cache)
 }
 
 fn retrieve_intervals_cached(
     intervals: &Vec<(usize, usize)>,
     merge: &Vec<Vec<i32>>,
-    diagonal: &Vec<usize>,
     i: usize,
     j: usize,
     cache: &mut HashMap<(usize, usize), Vec<(usize, usize)>>,
@@ -269,8 +263,8 @@ fn retrieve_intervals_cached(
         )]
     } else {
         let mid = merge[i][j] as usize;
-        let mut left = retrieve_intervals_cached(intervals, merge, diagonal, i, mid, cache);
-        let mut right = retrieve_intervals_cached(intervals, merge, diagonal, mid + 1, j, cache);
+        let mut left = retrieve_intervals_cached(intervals, merge, i, mid, cache);
+        let mut right = retrieve_intervals_cached(intervals, merge, mid + 1, j, cache);
         left.append(&mut right);
         left
     };

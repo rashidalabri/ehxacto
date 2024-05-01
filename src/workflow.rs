@@ -75,8 +75,8 @@ fn create_variant_node(
     let id = format!("{}/{}", region.id, variant_id);
     let region = ReferenceRegion {
         contig: region.contig.clone(),
-        start: region.start as i64 + tract.0 as i64,
-        end: region.start as i64 + tract.1 as i64,
+        start: region.start + tract.0 as i64,
+        end: region.start + tract.1 as i64,
     };
     let definition = VariantNodeDefinition::ShortTandemRepeatZeroOrMore(motif.clone());
     let variant_type = VariantType::Repeat;
@@ -178,8 +178,8 @@ fn process_region(
     //     panic!();
     // }
 
-    let original = process_region_helper(reference, region, false, &args)?;
-    let reverse_complement = process_region_helper(reference, region, true, &args)?;
+    let original = process_region_helper(reference, region, false, args)?;
+    let reverse_complement = process_region_helper(reference, region, true, args)?;
 
     // Return both directions
     if args.output_rev_comp {
@@ -187,15 +187,15 @@ fn process_region(
     }
 
     if original.nodes.is_empty() && reverse_complement.nodes.is_empty() {
-        return Ok((None, None));
+        Ok((None, None))
     } else if original.nodes.is_empty() {
-        return Ok((None, Some(reverse_complement)));
-    } else if reverse_complement.nodes.is_empty() {
-        return Ok((Some(original), None));
-    } else if original.nodes.len() <= reverse_complement.nodes.len() {
-        return Ok((Some(original), None));
+        Ok((None, Some(reverse_complement)))
+    } else if reverse_complement.nodes.is_empty()
+        || original.nodes.len() <= reverse_complement.nodes.len()
+    {
+        Ok((Some(original), None))
     } else {
-        return Ok((None, Some(reverse_complement)));
+        Ok((None, Some(reverse_complement)))
     }
 }
 
@@ -216,7 +216,7 @@ pub fn process_regions(regions: &Vec<RepeatRegion>, args: &Args) -> Result<Vec<R
     let loci: Vec<RepeatLocus> = loci
         .into_iter()
         .flat_map(|(a, b)| vec![a, b])
-        .filter_map(|locus| locus)
+        .flatten()
         .collect();
 
     Ok(loci)

@@ -1,4 +1,3 @@
-
 use crate::region::ReferenceRegion;
 use crate::types::Sequence;
 use anyhow::Result;
@@ -105,7 +104,7 @@ impl ser::Serialize for RepeatLocus {
             .filter_map(|node| {
                 if let LocusNode::Variant(var) = node {
                     Some((
-                        format!("{}", var.id),
+                        var.id.to_string(),
                         (format!("{}", var.region), format!("{:?}", var.variant_type)),
                     ))
                 } else {

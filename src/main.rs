@@ -84,7 +84,7 @@ fn main() -> Result<()> {
         .into_iter()
         .filter(|locus| {
             let locus_structure_len = locus.structure().len();
-            locus.nodes.len() > 0
+            !locus.nodes.is_empty()
                 && locus.nodes.len() <= max_nodes
                 && locus_structure_len <= args.max_locus_length
         })
@@ -104,13 +104,7 @@ fn main() -> Result<()> {
         let n_variant_nodes = locus
             .nodes
             .iter()
-            .filter(|node| {
-                if let LocusNode::Variant(_) = node {
-                    true
-                } else {
-                    false
-                }
-            })
+            .filter(|node| matches!(node, LocusNode::Variant(_)))
             .count();
         let entry = n_nodes.entry(n_variant_nodes).or_insert(0);
         *entry += 1;

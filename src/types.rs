@@ -9,11 +9,6 @@ use std::ops::DerefMut;
 pub struct Sequence(Vec<u8>);
 
 impl Sequence {
-    // Helper function to convert to String
-    pub fn to_string(&self) -> String {
-        String::from_utf8_lossy(&self.0).into_owned()
-    }
-
     pub fn reverse_complement(&self) -> Self {
         let revcomp = self.0.iter().rev().map(|&c| match c {
             b'A' => b'T',
@@ -22,7 +17,6 @@ impl Sequence {
             b'T' => b'A',
             _ => c,
         });
-
         Sequence(revcomp.collect())
     }
 }
@@ -85,7 +79,8 @@ impl DerefMut for Sequence {
 
 impl fmt::Display for Sequence {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.to_string())
+        let seq: &str = self.as_ref();
+        write!(f, "{}", seq)
     }
 }
 
