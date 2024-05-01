@@ -1,10 +1,13 @@
 [package]
 name = "ehxacto"
 version = "0.1.0"
+authors = ["Rashid Al-Abri <hello@rashidalabri.com>"]
 edition = "2021"
-description = "Find exact tandem repeat expansion regions from ExpansionHunter denovo output"
+description = "Find exact tandem repeat coordinates from approximate regions identified by ExpansionHunter denovo"
 repository = "https://github.com/rashidalabri/ehxacto"
 license = "MIT OR Apache-2.0"
+keywords = ["bioinformatics", "genomics", "tandem-repeats"]
+categories = ["science"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
